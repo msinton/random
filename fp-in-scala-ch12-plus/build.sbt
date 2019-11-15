@@ -23,10 +23,10 @@ lazy val testSettings = Seq(
 
 lazy val root = project
   .in(file("."))
-  .settings( scalaSettings )
-  .aggregate(first, second)
+  .settings(scalaSettings)
+  .aggregate(fp)
 
-lazy val first = project
+lazy val fp = project
   .in(file("fp"))
   .settings(
     moduleName := "fp",
