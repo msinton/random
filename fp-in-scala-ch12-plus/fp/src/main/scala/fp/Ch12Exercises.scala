@@ -109,7 +109,7 @@ object Traverse {
     override def traverse[G[_], A, B](
       fa: Option[A]
     )(f: A => G[B])(implicit G: Applicative[G]): G[Option[B]] =
-      fa match {
+      fa match {                                                       
         case None    => G.unit(None)
         case Some(a) => G.map(f(a))(Option(_))
       }
