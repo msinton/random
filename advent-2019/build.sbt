@@ -23,8 +23,8 @@ lazy val testSettings = Seq(
 
 lazy val root = project
   .in(file("."))
-  .settings( scalaSettings )
-  .aggregate(first, second)
+  .settings(scalaSettings)
+  .aggregate(first, second, thrid)
 
 lazy val first = project
   .in(file("day1-10"))
@@ -37,8 +37,19 @@ lazy val first = project
   )
   .withDependencies
 
-  lazy val second = project
+lazy val second = project
   .in(file("day11-20"))
+  .settings(
+    moduleName := "day1-10",
+    name := moduleName.value,
+    scalaSettings,
+    commonSettings,
+    testSettings
+  )
+  .withDependencies
+
+lazy val thrid = project
+  .in(file("day21-25"))
   .settings(
     moduleName := "day1-10",
     name := moduleName.value,
@@ -51,7 +62,6 @@ lazy val first = project
 def addCommandsAlias(name: String, values: List[String]) =
   addCommandAlias(name, values.mkString(";", ";", ""))
 
-// TODO apply to test sources
 addCommandsAlias(
   "tidy",
   List(

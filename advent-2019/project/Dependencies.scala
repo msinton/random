@@ -13,7 +13,7 @@ object Dependencies extends AutoPlugin {
     val catsVersion = "2.0.0"
 
     val kittens = Seq(
-      "org.typelevel" %% "cats-free" % catsVersion, // TODO learn free
+      "org.typelevel" %% "cats-free" % catsVersion,
       "org.typelevel" %% "kittens" % catsVersion
     )
 
@@ -32,17 +32,22 @@ object Dependencies extends AutoPlugin {
       "com.beachape" %% "enumeratum-cats" % "1.5.16"
     )
 
+    val monocle = Seq(
+      "com.github.julien-truffaut" %% "monocle-core",
+      "com.github.julien-truffaut" %% "monocle-macro"
+    ).map(_ % "2.0.0")
+
     val scalaTest = Seq(
-      "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2",
-      "org.typelevel" %% "discipline-scalatest" % "1.0.0-RC1"
+      "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2"
     )
 
     Seq(
       libraryDependencies ++= {
-          kittens ++
+        kittens ++
           refined ++
           circe ++
-          enumeratum
+          enumeratum ++
+          monocle
       },
       libraryDependencies ++= {
         scalaTest

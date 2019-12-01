@@ -1,16 +1,16 @@
 package advent
 
-class Day11Spec extends BaseSpec {
+class day7Spec extends BaseSpec {
 
-  import day11._
+  import day7._
 
-  describe("day11") {
+  describe("day7") {
     it("star 1") {
       println(f)
     }
 
     it("star 2") {
-      println(f)
+      println()
     }
   }
 }

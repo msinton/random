@@ -1,6 +1,6 @@
 package advent
 
-object day11 {
+object day21 {
 
   def f = 1
 }

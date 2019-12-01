@@ -1,8 +1,6 @@
 package advent
 
-import org.scalatest.funspec.AnyFunSpec
-
-class Day1Spec extends AnyFunSpec {
+class Day1Spec extends BaseSpec {
 
   import day1._
 
