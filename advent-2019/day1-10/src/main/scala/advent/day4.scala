@@ -9,19 +9,19 @@ object day4 {
 
   def digitsMonotonic(i: Int) =
     digits(i)
-      .pipe(x => x zip x.tail)
-      .pipe(_.forall { case (a, b) => a <= b })
+      .pipe(_.sliding(2))
+      .pipe(_.forall { case List(a, b) => a <= b })
 
   def containsTwoAdjacent(i: Int) =
     digits(i)
-      .pipe(x => x zip x.tail)
-      .pipe(_.exists { case (a, b) => a == b })
+      .pipe(_.sliding(2))
+      .pipe(_.exists { case List(a, b) => a == b })
 
+  // there exists a group of 2 adjacent without there being more than 2 adjacent
   def containsExactlyTwoAdjacent(i: Int) =
     digits(i)
       .pipe { x =>
-        val pairs = x zip x.tail
-        pairs.exists { case (a, b) => a == b && x.count(_ == a) == 2 }
+        x.sliding(2).exists { case List(a, b) => a == b && x.count(_ == a) == 2 }
       }
 
   def passwords(range: Range) =
@@ -35,8 +35,10 @@ object day4 {
       .filter(digitsMonotonic)
       // .filter(containsExactlyTwoAdjacent)
       .filter { x => // since monotonic can do:
-        val d = digits(x)
-        d.groupBy(identity).values.map(_.size).toList.contains(2)
+        digits(x)
+          .groupBy(identity)
+          .values
+          .exists(_.size == 2)
       }
       .toList
 }
