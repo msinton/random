@@ -1,5 +1,7 @@
 package advent
 
+import day5._
+
 object day7 {
-  def f = 1
+  def maxThrusterOutput(input: IndexedSeq[Int]) = 1
 }
