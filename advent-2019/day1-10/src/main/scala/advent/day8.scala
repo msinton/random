@@ -1,5 +1,6 @@
 package advent
-import scala.collection.SortedMap
+
+import scala.util.chaining._
 
 object day8 {
 
@@ -13,26 +14,22 @@ object day8 {
   def toLines(input: String): List[IndexedSeq[Int]] =
     input.grouped(dimensions._1).map(_.map(_.asDigit)).toList
 
-  def toLayers(lines: List[IndexedSeq[Int]]): SortedMap[Int, List[IndexedSeq[Int]]] =
-    SortedMap(lines.grouped(dimensions._2).zipWithIndex.map(_.swap).toList: _*)
+  def toLayers(lines: List[IndexedSeq[Int]]): Seq[List[IndexedSeq[Int]]] =
+    lines.grouped(dimensions._2).toSeq
 
-  def fewestZeroLayer1x2(input: String): Int = {
-    val layers = parseInput(input)
-
-    val layer = layers(
-      layers.view.mapValues(_.flatten.count(_ == 0)).toList.minBy(_._2)._1
-    )
-
-    layer.flatten.count(_ == 1) * layer.flatten.count(_ == 2)
-  }
+  def fewestZeroLayer1x2(input: String): Int =
+    parseInput(input)
+      .pipe(_.minBy(_.flatten.count(_ == 0)))
+      .flatten
+      .pipe(x => x.count(_ == 1) * x.count(_ == 2))
 
   val black = 0
   val white = 1
 
   def mergeLayers(
-    over: IndexedSeq[IndexedSeq[Int]],
-    below: IndexedSeq[IndexedSeq[Int]]
-  ): IndexedSeq[IndexedSeq[Int]] =
+    over: List[IndexedSeq[Int]],
+    below: List[IndexedSeq[Int]]
+  ): List[IndexedSeq[Int]] =
     (over zip below).map {
       case (a, b) => (a zip b).map(Function.tupled(mergeCell))
     }
@@ -53,8 +50,8 @@ object day8 {
       })
       .mkString("\n")
 
-  def decode(input: String): IndexedSeq[IndexedSeq[Int]] = {
-    val layers = parseInput(input).values.map(_.toIndexedSeq).toList
+  def decode(input: String): List[IndexedSeq[Int]] = {
+    val layers = parseInput(input).toList
 
     layers.tail.foldLeft(layers.head)(mergeLayers)
   }
