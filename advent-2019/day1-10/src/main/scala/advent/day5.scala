@@ -66,13 +66,19 @@ object day5 {
     instr: Instruction,
     position: Position,
     memory: IndexedSeq[Int],
-    input: Int
-  ): Either[Int, (IndexedSeq[Int], Int, Position)] = {
+    inputs: List[Int],
+    outputs: List[Int]
+  ): Either[Int, (IndexedSeq[Int], List[Int], Position, List[Int])] = {
 
     val at = position.value
 
-    def continue(next: IndexedSeq[Int], newAt: Int = at + instr.value.params + 1) =
-      (next, input, Position(newAt)).asRight[Int]
+    def continue(
+      next: IndexedSeq[Int],
+      newAt: Int = at + instr.value.params + 1,
+      inputs: List[Int] = inputs,
+      outputs: List[Int] = outputs
+    ) =
+      (next, inputs, Position(newAt), outputs).asRight[Int]
 
     def paramFetch(relativeIndex: Int) =
       getParam(
@@ -89,11 +95,10 @@ object day5 {
         continue(memory.updated(memory(at + 3), paramFetch(1) * paramFetch(2)))
 
       case SaveInput =>
-        continue(memory.updated(memory(at + 1), input))
+        continue(memory.updated(memory(at + 1), inputs.head), inputs = inputs.tail)
 
       case Output =>
-        println("OUT " + paramFetch(1))
-        continue(memory)
+        continue(memory, outputs = outputs :+ paramFetch(1))
 
       case JumpIfTrue =>
         val first = paramFetch(1)
@@ -118,21 +123,26 @@ object day5 {
         continue(memory.updated(memory(at + 3), store))
 
       case Halt =>
-        input.asLeft
+        println(outputs.last)
+        outputs.last.asLeft
     }
   }
 
-  @tailrec
-  def loop(at: Position, memory: IndexedSeq[Int], input: Int): Int = {
-    val instruction = parseInstr(memory(at.value))
+  def run(memory: IndexedSeq[Int], inputs: List[Int]): Int = {
+    @tailrec
+    def loop(at: Position, memory: IndexedSeq[Int], inputs: List[Int], outputs: List[Int]): Int = {
+      val instruction = parseInstr(memory(at.value))
 
-    applyInstr(instruction, at, memory, input) match {
-      case Left(value)                        => value
-      case Right((next, nextInput, position)) => loop(position, next, nextInput)
+      applyInstr(instruction, at, memory, inputs, outputs) match {
+        case Left(value) => value
+        case Right((next, nextInputs, position, nextOutputs)) =>
+          loop(position, next, nextInputs, nextOutputs)
+      }
     }
+    loop(Position(0), memory, inputs, List.empty)
   }
 
-  def diagnostic(input: IndexedSeq[Int], inputValue: Int): Int =
-    loop(Position(0), input, inputValue)
+  def diagnostic(memory: IndexedSeq[Int], input: Int): Int =
+    run(memory, List(input))
 
 }
