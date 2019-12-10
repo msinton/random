@@ -3,8 +3,6 @@ package advent
 import cats.data._
 import cats.implicits._
 
-import day5._
-
 object day7 {
 
   def maxThrusterOutput(memory: IndexedSeq[Int]) = {
@@ -27,7 +25,7 @@ object day7 {
 
   def star2(memory: IndexedSeq[Int]) = {
 
-    val range = (5 to 9).toList
+    val range = (5L to 9L).toList
     val machines = ConnectedMachines(List.fill(range.size)(IntCodeMachine(memory, Position(0))))
 
     (for {
@@ -71,7 +69,10 @@ object day7 {
   }
 
   def thrusterOutput(memory: IndexedSeq[Int], input: Int, phase: Int): Int =
-    // println(s"input $input phase $phase")
-    run(memory, List(phase, input))
+    IntCodeMachine(memory, Position(0)).runWith(List(phase.toLong, input.toLong)) match {
+      case x: RunResult.Output =>
+        x.value.toInt
+      case RunResult.Stop => throw new Exception("program error")
+    }
 
 }

@@ -10,12 +10,6 @@ class day3Spec extends BaseSpec {
     }
 
     it("star 2") {
-      // println(
-      //   shortestIntersection(
-      //     "R75,D30,R83,U83,L12,D49,R71,U7,L72".split(",").toList,
-      //     "U62,R66,U55,R34,D71,R55,D58,R83".split(",").toList
-      //   )
-      // )
       println(shortestIntersection(wire1, wire2))
     }
   }

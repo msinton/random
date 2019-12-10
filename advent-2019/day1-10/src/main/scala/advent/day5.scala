@@ -1,43 +1,13 @@
 package advent
 
 import cats.implicits._
-import enumeratum.values.IntEnum
-import enumeratum.values.IntEnumEntry
 import scala.annotation.tailrec
-
-sealed abstract class ParamMode(val value: Int) extends IntEnumEntry
-object ParamMode extends IntEnum[ParamMode] {
-
-  val values = findValues
-
-  case object Position extends ParamMode(0)
-  case object Immediate extends ParamMode(1)
-}
-
-sealed abstract class Instr(val value: Int, val params: Int) extends IntEnumEntry
-
-object Instr extends IntEnum[Instr] {
-
-  val values = findValues
-
-  case object Add extends Instr(1, params = 3)
-  case object Mult extends Instr(2, params = 3)
-  case object SaveInput extends Instr(3, params = 1)
-  case object Output extends Instr(4, params = 1)
-  case object JumpIfTrue extends Instr(5, params = 2)
-  case object JumpIfFalse extends Instr(6, params = 2)
-  case object LessThan extends Instr(7, params = 3)
-  case object Equals extends Instr(8, params = 3)
-  case object Halt extends Instr(99, params = 0)
-}
-
-final case class Instruction(value: Instr, paramModes: Map[Int, ParamMode])
-
-final case class Position(value: Int) extends AnyVal
 
 object day5 {
 
   import Instr._
+
+  final case class Position(value: Int)
 
   def parseParamMode(paramInstr: String): Map[Int, ParamMode] =
     paramInstr.reverse
@@ -47,10 +17,11 @@ object day5 {
       .map(_.swap)
       .toMap
 
-  def getParam(memory: IndexedSeq[Int], at: Position, mode: ParamMode): Int =
+  def getParam(memory: IndexedSeq[Int], at: Position, mode: ParamMode, relativeBase: Int): Int =
     mode match {
       case ParamMode.Immediate => memory(at.value)
       case ParamMode.Position  => memory(memory(at.value))
+      case ParamMode.Relative  => memory(memory(at.value + relativeBase))
     }
 
   def parseInstr(value: Int): Instruction = {
@@ -84,7 +55,8 @@ object day5 {
       getParam(
         memory,
         Position(at + relativeIndex),
-        instr.paramModes.getOrElse(relativeIndex, ParamMode.Position)
+        instr.paramModes.getOrElse(relativeIndex, ParamMode.Position),
+        0
       )
 
     instr.value match {
@@ -122,8 +94,9 @@ object day5 {
         val store = if (first === second) 1 else 0
         continue(memory.updated(memory(at + 3), store))
 
+      case RelativeBase => ???
+
       case Halt =>
-        println(outputs.last)
         outputs.last.asLeft
     }
   }

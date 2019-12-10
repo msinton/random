@@ -58,15 +58,6 @@ object day6 {
     val youAncestors = collectAncestors("YOU", orbits, Nil)
     val sanAncestors = collectAncestors("SAN", orbits, Nil)
 
-    println(youAncestors)
-    println(sanAncestors)
-    println(
-      youAncestors.toSet
-        .intersect(
-          sanAncestors.toSet
-        )
-    )
-
     val closestAncestorDepth = youAncestors.toSet
       .intersect(
         sanAncestors.toSet

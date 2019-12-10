@@ -7,7 +7,7 @@ class day6Spec extends BaseSpec {
   describe("day6") {
     it("star 1") {
       println(
-        // totalOrbits(input)
+        totalOrbits(input)
       )
     }
 
