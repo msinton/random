@@ -28,7 +28,7 @@ object day10 {
 
   def asteroidsLineOfSight(input: String): Map[Coord, Set[Visible]] =
     (parse _)
-      .andThen(xs => xs.toList.foldMap(x => Map(x -> visibile(x, xs - x))))
+      .andThen(xs => xs.toList.foldMap(x => Map(x -> visible(x, xs - x))))
       .apply(input)
 
   def bestLineOfSight(asteroids: Map[Coord, Set[Visible]]) =
@@ -39,14 +39,14 @@ object day10 {
   def bestLineOfSightCount(input: String) =
     asteroidsLineOfSight(input).pipe(bestLineOfSight)._2.size
 
-  def visibile(a: Coord, xs: Set[Coord]): Set[Visible] =
+  def visible(a: Coord, xs: Set[Coord]): Set[Visible] =
     xs.map(b => Visible(b, radians(a, b), distance(a, b)))
 
   def radians(a: Coord, b: Coord): Radians =
-    Radians(Math.atan2(b._1 - a._1.toDouble, b._2 - a._2.toDouble)) // x, y backwards to flip axis for star 2
+    Radians(math.atan2(b._1 - a._1.toDouble, b._2 - a._2.toDouble)) // x, y backwards to flip axis for star 2
 
   def distance(x: Coord, y: Coord): Int =
-    Math.abs(x._1 - y._1) + Math.abs(x._2 - y._2)
+    math.abs(x._1 - y._1) + math.abs(x._2 - y._2)
 
   def reduceByLineOfSight(xs: Set[Visible]): Set[Visible] =
     xs.groupBy(_.radians).values.map(_.minBy(_.distance)).toSet
