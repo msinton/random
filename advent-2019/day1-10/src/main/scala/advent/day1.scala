@@ -9,7 +9,7 @@ import scala.annotation.tailrec
 object day1 {
 
   def calcFuel(i: Int): Int =
-    (i / 3d).toInt - 2
+    i / 3 - 2
 
   def calcFuels(input: List[Int]) =
     input.foldMap(calcFuel)

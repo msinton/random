@@ -14,6 +14,7 @@ object Dependencies extends AutoPlugin {
 
     val kittens = Seq(
       "org.typelevel" %% "cats-free" % catsVersion,
+      "org.typelevel" %% "cats-effect" % catsVersion,
       "org.typelevel" %% "kittens" % catsVersion
     )
 

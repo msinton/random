@@ -65,9 +65,6 @@ final case class IntCodeMachine(memory: Memory, position: Position) {
       prevState: State
     ): RunResult = {
       val instruction = parseInstr(memory.value(prevState.position))
-      // println(instruction)
-      // println(prevState.position)
-      // println(prevState.inputs)
 
       applyInstr(instruction, prevState) match {
         case Left(value) =>
@@ -198,7 +195,7 @@ object IntCodeMachine {
     new IntCodeMachine(
       Memory(
         memory.zipWithIndex
-          .map(_.bimap(_.toLong, _.toLong.pipe(Position)))
+          .map(_.map(_.toLong.pipe(Position)))
           .map(_.swap)
           .toMap
       ),
@@ -285,8 +282,6 @@ object IntCodeMachine {
           .asRight
 
       case SaveInput =>
-        println(s"SAVE ----- ${literal(1)}")
-        println((memory, relativeBase, position, instr.paramModes.get(1)))
         State
           .mem(literal(1), inputs.head)
           .andThen(positionInc)
