@@ -162,6 +162,8 @@ trait IntMachine[F[_]] {
 
 object IOMachine extends IntMachine[IO]
 
+object PureMachine extends IntMachine[Id]
+
 final case class SyncIntMachine(getInput: IO[Int], state: State) {
 
   def run = IOMachine.execute(getInput, state)
