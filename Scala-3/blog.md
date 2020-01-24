@@ -329,7 +329,7 @@ TODO
 Scala 3.0 is coming! 
 
 Dotty became Feature Complete December 2019, this paves the way for Scala 3.0. 
-I have struggled to find conclusive indication of when that will be, one source says this Autmn, others tentatively indicate early 2020. 
+I have struggled to find conclusive indication of when that will be, one source says this Autmn. 
 First of all scala 2.14 will be released with the intention to enable smoother migration to Scala 3.0.
 
 You can start by trying out [Dotty](https://dotty.epfl.ch/) now, it's super simple to download and have a play in the REPL - and there are exmple Dotty projects to check out too.
