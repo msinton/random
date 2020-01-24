@@ -43,7 +43,7 @@ You can read more about this **wart** in Lihaoyi's excellent blog [Scala Warts -
 [Auto Eta Expansion - detailed reference](https://dotty.epfl.ch/docs/reference/changed-features/eta-expansion-spec.html)
 
 
-### Bye bye package object
+### Bye-bye package object
 
 Package objects are no longer needed since all kinds of definitions can now be written at the top-level. 
 
@@ -145,16 +145,33 @@ Enough said! ❤️
 
 Deprecated, to be replaced with xml string interpolation:
 
+_Scala 2:_
+
+```scala
+val people = 
+	<people>
+		<person firstName="John" lastName="Smith" age={{john.age}} gender="M" />
+		<person firstName="Ada" lastName="Lovelace" age={{ada.age}} gender="F" />
+  </people>
+```
+
+_Scala 3:_
+
 ``` scala
-xml"..."
+val people = xml"""
+	<people>
+		<person firstName="John" lastName="Smith" age=${john.age} gender="M" />
+		<person firstName="Ada" lastName="Lovelace" age=${ada.age} gender="F" />
+  </people>"""
 ```
 
 For those who use XML literals it might come as a blow. It seems the reason to drop this is for simplification - including
 XML literals in the language places a great burden on the language that some feel is not justified, and instead string interpolation
 can achieve the same end result, allbeit without some of the compile-time safety.
 
-For me and my team, this has no impact, but it is certainly noteworthy. See this [discussion on the original proposal](https://contributors.scala-lang.org/t/proposal-to-remove-xml-literals-from-the-language/2146/81). The TLDR is that it has been shown that the **Lift** framework still compiles after a re-write and using
-a thrid party interpolator. Thoguh there is still some way to go to prove that it all still works correctly.
+For me and my team, this has no impact, but it is certainly noteworthy. See this [discussion on the original proposal](https://contributors.scala-lang.org/t/proposal-to-remove-xml-literals-from-the-language/2146/81). 
+The TLDR is that it has been shown that the **Lift** framework still compiles after a re-write and using
+a thrid party interpolator. Though there is still some way to go to prove that it all still works correctly.
 
 ### No more Auto-Application
 
@@ -252,7 +269,7 @@ x.name // "C"
 
 Since List is covariant the intersection of `List[A]` and `List[B]` is `List[A & B]`.  Pretty nifty 
 
-(Intersection types - reference)[https://dotty.epfl.ch/docs/reference/new-types/intersection-types.html]
+[Intersection types - reference](https://dotty.epfl.ch/docs/reference/new-types/intersection-types.html)
 
 #### Union Types
 
@@ -265,23 +282,63 @@ val eitherManWomanOrChild: Man | Woman | Child = if (age <  18) Child() else if 
 eitherManWomanOrChild.eat(toast) // everyone can eat toast
 ```
 
+---------- TODO 
+
 ### Enums
 
-The Enumeration in Scala 2 are problematic to the point that nobody uses them. Instead we use `selaed trait` and rely
+The `Enumeration` type in Scala 2 is problematic to the point that nobody uses it. Instead we use `sealed trait` defined ADTs and rely
 on libraries like `enumeratum` to get nice enum behaviour. 
 
 Current problems:
-1) Enumerations have the same type after erasure.
-2) There’s no exhaustive matching check during compile.
-3) They don’t inter-operate with Java’s enum.
+1) Enumerations have the same type after erasure
+2) There’s no exhaustive compile-time matching check
+3) They don’t inter-operate with Java’s enum
 
 Essentially it looks like Scala 3 implements `enum` in much the same way as `enumeratum` as a sealed trait, but making this
 a first class language feature is a nice win as a developer. 
 
-I spend less time writing more boilerplate and adding dependencies, and less time explaining to newcomers why we even need to do that. 
+I spend less time writing boilerplate, adding dependencies and explaining to newcomers why we even need to do it in the first place. 
 
 Libraries should also provide more consistent support - it becomes less of an "optional" thing to provide support for `enumeratum`.
 
-(Enum - reference)[https://dotty.epfl.ch/docs/reference/enums/enums.html]
+```scala
+enum Color {
+  case Red, Green, Blue
+}
+```
 
-### 
+We can use enum for ADTs and Generalized Algebraic Data Types (GADTs).
+
+```scala
+enum Option[+T] {
+  case Some(x: T)
+  case None
+}
+```
+
+Awesome sauce 👍👍👍
+
+[Enum - reference](https://dotty.epfl.ch/docs/reference/enums/enums.html)
+
+### Implicits are bad, mkay
+
+TODO
+
+## Conclusion
+
+Scala 3.0 is coming! 
+
+Dotty became Feature Complete December 2019, this paves the way for Scala 3.0. 
+I have struggled to find conclusive indication of when that will be, one source says this Autmn, others tentatively indicate early 2020. 
+First of all scala 2.14 will be released with the intention to enable smoother migration to Scala 3.0.
+
+You can start by trying out [Dotty](https://dotty.epfl.ch/) now, it's super simple to download and have a play in the REPL - and there are exmple Dotty projects to check out too.
+
+Migration looks to be simple, with a focus on providing auto-re-write tooling for the few breaking changes.
+
+Developer experience will improve, the language will be more streamlined and less quirky. 
+I expect certain features will open the door to better libraries too. 
+
+I for one will try to do what I can to help the community, which has given so much to me, without expecting anything in return.
+
+
