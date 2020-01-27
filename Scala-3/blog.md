@@ -6,14 +6,14 @@ There are a whole bunch of changes that come with Scala 3. This is my opinionate
 If you (and your team) are anything like me (and mine) then hopefully this will be relevant to you!
 
 
-## Introduction
+# Introduction
 First of all I want to say a huge thank you to the folks who have been working hard on Scala 3 and that I’m excited to start enjoying the benefits in my everyday work.
 
-Scala 3 is built on a new foundation called **DOTTY**. The name **DOTTY** comes from [Dependent Object Types (DOT)](http://lampwww.epfl.ch/~amin/dot/fool.pdf) which is the calculus for path-dependent types. The important take-away is that after 8 years of experience refining Scala, the team behind the language have specifically designed DOTTY to model a Scala-like language and become a strong new foundation that will enable Scala to be the language they want it to be. DOT is also **simpler** than the previous foundation, and places emphasis on accessibility and safety.
+Scala 3 is built on a new foundation called **Dotty**. The name **Dotty** comes from [Dependent Object Types (DOT)](http://lampwww.epfl.ch/~amin/dot/fool.pdf) which is the calculus for path-dependent types. The important take-away is that after 8 years of experience refining Scala, the team behind the language have specifically designed Dotty to model a Scala-like language and become a strong new foundation that will enable Scala to be the language they want it to be. DOT is also **simpler** than the previous foundation, and places emphasis on accessibility and safety.
 
-## 1 Dropped and changed features - some "warts" removed
+# Dropped and changed features - some "warts" removed
 
-### Automatic Eta Expansion
+## Automatic Eta Expansion
 
 This makes me so happy! 😄
 
@@ -43,7 +43,7 @@ You can read more about this **wart** in Lihaoyi's excellent blog [Scala Warts -
 [Auto Eta Expansion - detailed reference](https://dotty.epfl.ch/docs/reference/changed-features/eta-expansion-spec.html)
 
 
-### Bye-bye package object
+## Bye-bye package object
 
 Package objects are no longer needed since all kinds of definitions can now be written at the top-level. 
 
@@ -63,7 +63,7 @@ The restriction that everything you write needs to live inside an object, class 
 package objects were clearly just a special case of object that attempted to alleviate this problem. 
 This is nice, more warts removed.
 
-#### 🕊️ To migrate 🕊️
+### 🕊️ To migrate 🕊️
 
 You will not be required to migrate initially, in Scala 3.0 package objects are only deprecated.
 That said, it shouldn't be too hard!
@@ -90,7 +90,7 @@ I expect there will be tools to do this automagically.
 [Dropped: Package Objects - reference details](https://dotty.epfl.ch/docs/reference/dropped-features/package-objects.html)
 
 
-### Limit 22
+## Limit 22
 
 For most people reaching this limit has been a rare thing and often easy to workaround - though my team has encountered this problem (in config loading). 
 
@@ -131,7 +131,7 @@ def makeEarth(
 
 [Dropped: Limit 22 - reference](https://dotty.epfl.ch/docs/reference/dropped-features/limit22.html)
 
-### Tuples concat!
+## Tuples concat!
 
 ``` scala
 (1, "thing", 3.14, false) ++ ("more", "and", 2, "more")
@@ -141,7 +141,7 @@ def makeEarth(
 Enough said! ❤️
 
 
-### XML literals
+## XML literals
 
 Deprecated, to be replaced with xml string interpolation:
 
@@ -173,7 +173,7 @@ For me and my team, this has no impact, but it is certainly noteworthy. See this
 The TLDR is that it has been shown that the **Lift** framework still compiles after a re-write and using
 a thrid party interpolator. Though there is still some way to go to prove that it all still works correctly.
 
-### No more Auto-Application
+## No more Auto-Application
 
 This is now an error
 
@@ -200,7 +200,7 @@ With this restriction in place the decision to write your methods with or withou
 
 In fact, there are even mistakes in the Scala 2 libraries - in particular `def toInt()` !
 
-#### 🕊️ To Migrate 🕊️
+### 🕊️ To Migrate 🕊️
 
 Your code can still be compiled in Dotty under -language:Scala2Compat. 
 
@@ -208,11 +208,11 @@ When paired with the `-rewrite option`, the code will be automatically rewritten
 
 [Dropped: Auto-Application - reference](https://dotty.epfl.ch/docs/reference/dropped-features/auto-apply.html)
 
-## 2 New features!
+# 2 New features!
 
-### Types - intersection and union
+## Types - intersection and union
 
-#### Intersection types
+### Intersection types
 
 ```scala
 trait HasAge { def age: Int }
@@ -271,7 +271,7 @@ Since List is covariant the intersection of `List[A]` and `List[B]` is `List[A &
 
 [Intersection types - reference](https://dotty.epfl.ch/docs/reference/new-types/intersection-types.html)
 
-#### Union Types
+### Union Types
 
 This follows a similar story to the intersection types above. In short, we can provide unions with `|`
 
@@ -284,7 +284,7 @@ eitherManWomanOrChild.eat(toast) // everyone can eat toast
 
 ---------- TODO 
 
-### Enums
+## Enums
 
 The `Enumeration` type in Scala 2 is problematic to the point that nobody uses it. Instead we use `sealed trait` defined ADTs and rely
 on libraries like `enumeratum` to get nice enum behaviour. 
@@ -320,11 +320,112 @@ Awesome sauce 👍👍👍
 
 [Enum - reference](https://dotty.epfl.ch/docs/reference/enums/enums.html)
 
-### Implicits are bad, mkay
+## Implicits are bad, mkay
 
-TODO
+So implicits are really a mixed bag. Also known as term inference, the construct is present in other languages like Haskell, Rust and Swift and may be coming to Kotlin, C# and F#.
+Scala wouldn't be as popular as it is today without them.
 
-## Conclusion
+So what's the big deal? 
+
+### Summary of current issues with Scala implicits
+1. Being very powerful, implicits are easily over-used and mis-used
+2. Over-reliance on implicit imports leads to inscrutable type errors
+3. The keyword `implicit` is used for a large number of language constructs, requiring the reader to decipher what the intent is in each case
+4. Implicit parameters are awkward - e.g. they must have a name, even though in many cases that name is never referenced
+5. Implicits pose challenges for tooling. The set of available implicits depends on context, so command completion has to take context into account.
+
+If you've been writing Scala for a while you may have learnt the common use cases for implicits and are happy with them as they are, 
+but for newcommers, learning Scala can become a mountain to climb.
+
+This section could easily be a whole blog post by itself, for that reason I will only give a brief summary of the new syntax.
+
+### `given` 
+
+A parameter declared as "given" must be supplied as a "given" instance.
+
+```scala
+def max[T](x: T, y: T)(given ord: Ord[T]): T =
+  if (ord.compare(x, y) < 0) y else x
+```
+
+This max function can be read as: 
+"the `max` of 2 arguments `x` and `y` with type `T`, `given` that I have an Ordering for `T`, is found by comparing `x` and `y`"
+
+We can define the `given` instance for the ordering of ints:
+
+```scala
+given intOrd: Ord[Int] {
+  def compare(x: Int, y: Int) =
+    if (x < y) -1 else if (x > y) +1 else 0
+}
+```
+
+and use it in either of 2 ways:
+```scala
+package my.example
+
+given intOrd: Ord[Int] ...
+max(2, 3)
+max(2, 3)(given intOrd) // less common
+```
+
+importing given instances must be done like so:
+
+```scala
+import my.example.{given Ord[Int]} // imports only intOrd (from above) by referencing it's type
+import my.example.given // imports all the given instances in the package
+```
+
+Typically when importing "given instances" it makes more sense to import them by their type than by their name. 
+The name of a given instance is often unimportant, since only the correct type is required for its application.
+For the same reason, it is not required for given instances to have a name at all.
+
+```scala
+given Ord[Int] {
+  ...
+}
+```
+
+### ``
+
+## Extension methods - say goodbye to Syntax 
+
+If you are familiar with Typeclasses (which are an important mechanism for libraries such as Cats), you will know that
+we often need to define Syntax classes with serve to make writing code easier. 
+
+## main
+
+Scala 3 introduces a new way to declare an entry point for a program with `@main` annotation.
+
+```scala
+@main def programEntyPoint(): Unit = {
+  println("Hello World")
+}
+```
+
+## Optional Braces using `with`
+
+You may have heard that braces are becoming optional in Scala 3. As a result the keyword `with` has a new role
+so that curly braces are not required by class bodies and similar constructs.
+
+_Scala 2_
+```scala
+class NoBraces() {
+  def delete(braces: String): String
+}
+```
+
+_Scala 3_
+```scala
+class NoBraces() with
+  def delete(braces: String): String
+```
+
+Personally I like this. 🙂
+
+What I don't like is now I have a new problem - which should we use in our team's production code and will everyone agree?
+
+# Conclusion
 
 Scala 3.0 is coming! 
 
