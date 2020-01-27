@@ -37,7 +37,6 @@ _Scala 3:_
 val fooFunction = foo           // This is a function
 ```
 
-
 You can read more about this **wart** in Lihaoyi's excellent blog [Scala Warts - Weak Eta Expansion](http://www.lihaoyi.com/post/WartsoftheScalaProgrammingLanguage.html#weak-eta-expansion)
 
 [Auto Eta Expansion - detailed reference](https://dotty.epfl.ch/docs/reference/changed-features/eta-expansion-spec.html)
@@ -149,7 +148,7 @@ _Scala 2:_
 
 ```scala
 val people = 
-	<people>
+  <people>
 		<person firstName="John" lastName="Smith" age={{john.age}} gender="M" />
 		<person firstName="Ada" lastName="Lovelace" age={{ada.age}} gender="F" />
   </people>
@@ -159,7 +158,7 @@ _Scala 3:_
 
 ``` scala
 val people = xml"""
-	<people>
+  <people>
 		<person firstName="John" lastName="Smith" age=${john.age} gender="M" />
 		<person firstName="Ada" lastName="Lovelace" age=${ada.age} gender="F" />
   </people>"""
@@ -167,11 +166,13 @@ val people = xml"""
 
 For those who use XML literals it might come as a blow. It seems the reason to drop this is for simplification - including
 XML literals in the language places a great burden on the language that some feel is not justified, and instead string interpolation
-can achieve the same end result, allbeit without some of the compile-time safety.
+can achieve the same end result, albeit without some of the compile-time safety.
 
 For me and my team, this has no impact, but it is certainly noteworthy. See this [discussion on the original proposal](https://contributors.scala-lang.org/t/proposal-to-remove-xml-literals-from-the-language/2146/81). 
 The TLDR is that it has been shown that the **Lift** framework still compiles after a re-write and using
-a thrid party interpolator. Though there is still some way to go to prove that it all still works correctly.
+a third party interpolator. Though there is still some way to go to prove that it all still works correctly.
+
+[The official Dotty XML interpolator](https://github.com/lampepfl/xml-interpolator/)
 
 ## No more Auto-Application
 
@@ -246,8 +247,8 @@ It's not typically a deal breaker, but you can appreciate that fixing this is a 
 
 The problem comes when A and B share the same member (e.g. both have a `def children`). 
 Scala 3 solves this by making
-1) the new member an intersection will have a type that is the intersection of it's parents' types (see `children`)
-2) Forcing you to override conflicting members (see `name`)
+1) the new member's return type the intersection of its parent's types (see `children`)
+2) forcing you to override conflicting members (see `name`)
 
 ```scala
 trait A {
@@ -282,7 +283,10 @@ val eitherManWomanOrChild: Man | Woman | Child = if (age <  18) Child() else if 
 eitherManWomanOrChild.eat(toast) // everyone can eat toast
 ```
 
----------- TODO 
+Unions Types are similar to `Either` or `Coproduct` in that they allow you to handle more than one distinct possible types.
+An Either is right-biased and has a Monad, so provides different uses and is more powerful. 
+I'm sure union have their place, however, as yet I am unsure where I would use them - perhaps when following the [Principle of Least Power](http://www.lihaoyi.com/post/StrategicScalaStylePrincipleofLeastPower.html), 
+when I don't require the added benefits of an `Either`.
 
 ## Enums
 
@@ -335,9 +339,9 @@ So what's the big deal?
 5. Implicits pose challenges for tooling. The set of available implicits depends on context, so command completion has to take context into account.
 
 If you've been writing Scala for a while you may have learnt the common use cases for implicits and are happy with them as they are, 
-but for newcommers, learning Scala can become a mountain to climb.
+but for newcomers, learning Scala can become a mountain to climb.
 
-This section could easily be a whole blog post by itself, for that reason I will only give a brief summary of the new syntax.
+This section could easily be a whole blog post by itself, for that reason I will only give a brief summary of some of the new syntax.
 
 ### `given` 
 
@@ -362,7 +366,7 @@ given intOrd: Ord[Int] {
 
 and use it in either of 2 ways:
 ```scala
-package my.example
+package instances.int
 
 given intOrd: Ord[Int] ...
 max(2, 3)
@@ -372,8 +376,8 @@ max(2, 3)(given intOrd) // less common
 importing given instances must be done like so:
 
 ```scala
-import my.example.{given Ord[Int]} // imports only intOrd (from above) by referencing it's type
-import my.example.given // imports all the given instances in the package
+import instances.int.{given Ord[Int]} // imports only intOrd (from above) by referencing it's type
+import instances.int.given // imports all the given instances in the package
 ```
 
 Typically when importing "given instances" it makes more sense to import them by their type than by their name. 
@@ -386,12 +390,97 @@ given Ord[Int] {
 }
 ```
 
-### ``
+#### 🕊️ To Migrate 🕊️
 
-## Extension methods - say goodbye to Syntax 
+Old style implicits will can still be imported as they currently are, however they will also be imported through the new `given` style of imports.
+Gradually this old style will be deprecated (Scala 3.1) and then in a later version will give a compiler error.
+This will give libraries and users the chance to migrate smoothly.
+
+### `summon`
+
+Simply summons a `given` instance.
+
+_Scala 2_
+```scala
+val mySummonedIntOrd = implicitly[Ord[Int]]
+```
+
+_Scala 3_
+```scala
+val mySummonedIntOrd = summon[Ord[Int]]
+```
+
+## Extension methods - say goodbye to boilerplate
+
+Extension methods allow one to add methods to a type after the type is defined. Example:
+
+```scala
+case class Person(name: String, age: Int)
+
+def (p: Person).description: String = s"${p.name} is ${p.age} years old"
+
+// usage
+val bob = Person("Bob", 40)
+bob.description // "Bob is 40 years old"
+```
 
 If you are familiar with Typeclasses (which are an important mechanism for libraries such as Cats), you will know that
-we often need to define Syntax classes with serve to make writing code easier. 
+we often need to define Syntax classes with serve to make writing code easier by converting ordinary values to a partially applied typeclass instance.
+
+Extension methods make this easier
+
+_Extension method to add compare as an infix method. Requires a given instance of Ord, and is generic on type T_
+```scala
+object syntax {
+    @infix def [T](x: T) compare (y: T)(given ord: Ord[T]): Int = ord.compare(x, y)
+}
+
+import syntax._
+import instances.int.given
+
+1 compare 5 // -1
+```
+
+In a nutshell this has become much easier to do. 👍👍
+
+## Typeclasses 
+
+If you're not sure what a typeclass is, don't be put off. This is actually a fairly simple pattern
+to define behaviour for a single type. We've already seen it in previous examples.
+
+_Scala 2_
+
+```scala
+// typeclass
+trait Ord[T] {
+    def compare(x: T, y: T): Int
+}
+// a typeclass instance
+implicit val intOrd: Ord[Int] = new Ord[Int] {
+  def compare(x: Int, y: Int) =
+    if (x < y) -1 else if (x > y) +1 else 0
+}
+```
+
+_Scala 3_
+
+```scala
+// typeclass
+trait Ord[T] {
+    def compare(x: T, y: T): Int
+}
+// a typeclass instance
+given as Ord[Int] {
+  def compare(x: Int, y: Int) =
+    if (x < y) -1 else if (x > y) +1 else 0
+}
+```
+
+Essentially there is not a lot of change here. 
+Traits already did a good job of representing a typeclass.
+
+Declaring typeclass instances involves less boilerplate now. 👍
+
 
 ## main
 
@@ -403,7 +492,7 @@ Scala 3 introduces a new way to declare an entry point for a program with `@main
 }
 ```
 
-## Optional Braces using `with`
+## Optional Braces using `with`
 
 You may have heard that braces are becoming optional in Scala 3. As a result the keyword `with` has a new role
 so that curly braces are not required by class bodies and similar constructs.
@@ -430,10 +519,10 @@ What I don't like is now I have a new problem - which should we use in our team'
 Scala 3.0 is coming! 
 
 Dotty became Feature Complete December 2019, this paves the way for Scala 3.0. 
-I have struggled to find conclusive indication of when that will be, one source says this Autmn. 
+I have struggled to find conclusive indication of when that will be, one source says this Autumn. 
 First of all scala 2.14 will be released with the intention to enable smoother migration to Scala 3.0.
 
-You can start by trying out [Dotty](https://dotty.epfl.ch/) now, it's super simple to download and have a play in the REPL - and there are exmple Dotty projects to check out too.
+You can start by trying out [Dotty](https://dotty.epfl.ch/) now, it's super simple to download and have a play in the REPL - and there are example Dotty projects to check out too.
 
 Migration looks to be simple, with a focus on providing auto-re-write tooling for the few breaking changes.
 
