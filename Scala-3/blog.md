@@ -11,6 +11,8 @@ First of all I want to say a huge thank you to the folks who have been working h
 
 Scala 3 is built on a new foundation called **Dotty**. The name **Dotty** comes from [Dependent Object Types (DOT)](http://lampwww.epfl.ch/~amin/dot/fool.pdf) which is the calculus for path-dependent types. The important take-away is that after 8 years of experience refining Scala, the team behind the language have specifically designed Dotty to model a Scala-like language and become a strong new foundation that will enable Scala to be the language they want it to be. DOT is also **simpler** than the previous foundation, and places emphasis on accessibility and safety.
 
+For more information checkout the [Dotty docs](http://dotty.epfl.ch/docs/index.html)
+
 # Dropped and changed features - some "warts" removed
 
 ## Automatic Eta Expansion
@@ -205,7 +207,7 @@ In fact, there are even mistakes in the Scala 2 libraries - in particular `def t
 
 Your code can still be compiled in Dotty under -language:Scala2Compat. 
 
-When paired with the `-rewrite option`, the code will be automatically rewritten to conform to Dotty's stricter checking.
+When paired with the `-rewrite` option, the code will be automatically rewritten to conform to Dotty's stricter checking.
 
 [Dropped: Auto-Application - reference](https://dotty.epfl.ch/docs/reference/dropped-features/auto-apply.html)
 
@@ -219,7 +221,7 @@ When paired with the `-rewrite option`, the code will be automatically rewritten
 trait HasAge { def age: Int }
 trait Named { def name: String }
 
-def introduce(ab: Age & Named): String =  {
+def introduce(ab: HasAge & Named): String =  {
     s"My name is ${ab.name}, I am ${ab.age} years old"
 }
 ```
@@ -260,8 +262,8 @@ trait B {
   def name: String = "B"
 }
 class C extends A with B {
-  def children: List[A & B] 
-  def name: String = "C"
+  def children: List[A & B] = List.empty
+  override def name: String = "C"
 }
 val x: A & B = new C
 val ys: List[A & B] = x.children
@@ -280,7 +282,11 @@ This follows a similar story to the intersection types above. In short, we can p
 val eitherStringOrInt: String | Int = if (condition) "Fish" else 0
 val eitherManWomanOrChild: Man | Woman | Child = if (age <  18) Child() else if (mansplaining) Man() else Woman()
 
-eitherManWomanOrChild.eat(toast) // everyone can eat toast
+eitherManWomanOrChild match {
+  case x: Man => x.eat(toast)
+  case x: Woman => x.eat(toast)
+  case x: Child => x.eat(toast)
+} // everyone can eat toast ;) but you have to know who you are to do it ¯\_(ツ)_/¯
 ```
 
 Unions Types are similar to `Either` or `Coproduct` in that they allow you to handle more than one distinct possible types.
@@ -343,22 +349,24 @@ but for newcomers, learning Scala can become a mountain to climb.
 
 This section could easily be a whole blog post by itself, for that reason I will only give a brief summary of some of the new syntax.
 
-### `given` 
+### `given` and `with`
 
-A parameter declared as "given" must be supplied as a "given" instance.
+A `given` instance is conceptually the same as an implicit value.
+
+We use the keyword `with` to specify that we require a `given` instance.
 
 ```scala
-def max[T](x: T, y: T)(given ord: Ord[T]): T =
+def max[T](x: T, y: T) with (ord: Ord[T]): T =
   if (ord.compare(x, y) < 0) y else x
 ```
 
 This max function can be read as: 
-"the `max` of 2 arguments `x` and `y` with type `T`, `given` that I have an Ordering for `T`, is found by comparing `x` and `y`"
+"the `max` of 2 arguments `x` and `y` having type `T`, `with` an Ordering for `T`, is found by comparing `x` and `y`"
 
 We can define the `given` instance for the ordering of ints:
 
 ```scala
-given intOrd: Ord[Int] {
+given intOrd as Ord[Int] {
   def compare(x: Int, y: Int) =
     if (x < y) -1 else if (x > y) +1 else 0
 }
@@ -368,16 +376,16 @@ and use it in either of 2 ways:
 ```scala
 package instances.int
 
-given intOrd: Ord[Int] ...
+given intOrd as Ord[Int] ...
 max(2, 3)
-max(2, 3)(given intOrd) // less common
+max(2, 3).with(intOrd) // less common
 ```
 
 importing given instances must be done like so:
 
 ```scala
 import instances.int.{given Ord[Int]} // imports only intOrd (from above) by referencing it's type
-import instances.int.given // imports all the given instances in the package
+import instances.int.{given _} // imports all the given instances in the package
 ```
 
 Typically when importing "given instances" it makes more sense to import them by their type than by their name. 
@@ -392,7 +400,7 @@ given Ord[Int] {
 
 #### 🕊️ To Migrate 🕊️
 
-Old style implicits will can still be imported as they currently are, however they will also be imported through the new `given` style of imports.
+Old style implicits can still be imported as they currently are, however they will also be imported through the new `given` style of imports.
 Gradually this old style will be deprecated (Scala 3.1) and then in a later version will give a compiler error.
 This will give libraries and users the chance to migrate smoothly.
 
@@ -432,11 +440,11 @@ Extension methods make this easier
 _Extension method to add compare as an infix method. Requires a given instance of Ord, and is generic on type T_
 ```scala
 object syntax {
-    @infix def [T](x: T) compare (y: T)(given ord: Ord[T]): Int = ord.compare(x, y)
+    @infix def [T](x: T) compare (y: T) with (ord: Ord[T]): Int = ord.compare(x, y)
 }
 
 import syntax._
-import instances.int.given
+import instances.int.{given _}
 
 1 compare 5 // -1
 ```
@@ -470,7 +478,7 @@ trait Ord[T] {
     def compare(x: T, y: T): Int
 }
 // a typeclass instance
-given as Ord[Int] {
+given Ord[Int] {
   def compare(x: Int, y: Int) =
     if (x < y) -1 else if (x > y) +1 else 0
 }
