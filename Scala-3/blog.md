@@ -11,6 +11,8 @@ First of all I want to say a huge thank you to the folks who have been working h
 
 Scala 3 is built on a new foundation called **Dotty**. The name **Dotty** comes from [Dependent Object Types (DOT)](http://lampwww.epfl.ch/~amin/dot/fool.pdf) which is the calculus for path-dependent types. The important take-away is that after 8 years of experience refining Scala, the team behind the language have specifically designed Dotty to model a Scala-like language and become a strong new foundation that will enable Scala to be the language they want it to be. DOT is also **simpler** than the previous foundation, and places emphasis on accessibility and safety.
 
+This post is based on Dotty version 0.22. 
+
 For more information checkout the [Dotty docs](http://dotty.epfl.ch/docs/index.html)
 
 # Dropped and changed features - some "warts" removed
@@ -280,7 +282,8 @@ This follows a similar story to the intersection types above. In short, we can p
 
 ```scala
 val eitherStringOrInt: String | Int = if (condition) "Fish" else 0
-val eitherManWomanOrChild: Man | Woman | Child = if (age <  18) Child() else if (mansplaining) Man() else Woman()
+val eitherManWomanOrChild: Man | Woman | Child = 
+  if (age <  18) Child() else if (mansplaining) Man() else Woman()
 
 eitherManWomanOrChild match {
   case x: Man => x.eat(toast)
@@ -433,7 +436,7 @@ bob.description // "Bob is 40 years old"
 ```
 
 If you are familiar with Typeclasses (which are an important mechanism for libraries such as Cats), you will know that
-we often need to define Syntax classes with serve to make writing code easier by converting ordinary values to a partially applied typeclass instance.
+we often need to define Syntax classes which serve to make writing code easier by converting ordinary values to a partially applied typeclass instance.
 
 Extension methods make this easier
 
@@ -492,7 +495,7 @@ Declaring typeclass instances involves less boilerplate now. 👍
 
 ## main
 
-Scala 3 introduces a new way to declare an entry point for a program with `@main` annotation.
+Scala 3 introduces a new way to declare an entry point for a program with the `@main` annotation.
 
 ```scala
 @main def programEntyPoint(): Unit = {
