@@ -138,7 +138,7 @@ def makeEarth(
 
 ``` scala
 (1, "thing", 3.14, false) ++ ("more", "and", 2, "more")
-> (1, "thing", 3.14, false, "more", "and", 2, "more)
+> (1, "thing", 3.14, false, "more", "and", 2, "more")
 ```
 
 Enough said! ❤️
