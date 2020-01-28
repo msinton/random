@@ -151,8 +151,8 @@ _Scala 2:_
 ```scala
 val people = 
   <people>
-		<person firstName="John" lastName="Smith" age={{john.age}} gender="M" />
-		<person firstName="Ada" lastName="Lovelace" age={{ada.age}} gender="F" />
+	<person firstName="John" lastName="Smith" age={{john.age}} gender="M" />
+	<person firstName="Ada" lastName="Lovelace" age={{ada.age}} gender="F" />
   </people>
 ```
 
@@ -161,8 +161,8 @@ _Scala 3:_
 ``` scala
 val people = xml"""
   <people>
-		<person firstName="John" lastName="Smith" age=${john.age} gender="M" />
-		<person firstName="Ada" lastName="Lovelace" age=${ada.age} gender="F" />
+	<person firstName="John" lastName="Smith" age=${john.age} gender="M" />
+	<person firstName="Ada" lastName="Lovelace" age=${ada.age} gender="F" />
   </people>"""
 ```
 
