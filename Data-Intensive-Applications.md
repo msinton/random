@@ -69,3 +69,43 @@ Cassandra, Riak - gossip protocol
 (can use ZooKeeper as responsible for knowing the correct routing)
 Couchbase, HBase, SolrCloud, Kafka
 3) clients must be aware of the partitioning
+
+## Transactions
+
+ACID: Atomicity, Consistency, Isolation, Durability
+
+Transation support in MySQL, PostgresSQL, Oracle, SQL Server probably based on System R.
+
+NoSQL was thought to mean no transactions but this is not true. Though most did abandon them. Transactions are not the antithesis of scalability, neither are they required for "serious applications" with "valuable data".
+
+### Atomicity
+Different meanings in other contexts. Here, abortability is apt.
+
+### Consistency
+Doesn't really belong since depends the application developer + atomicity and isolation.
+
+### Isolation
+Sometimes this is the stronger guarantee of serializable isolation = each transaction pretends it is the only one being run on the database. The result is the same as if the operations ran serially, though in reality they may have been concurrently with other transactions.
+
+To combat race conditions. 
+
+### Durability
+No data loss even if there is a hardware fault or DB (node) crash.
+
+May mean written to disk to write-ahead log.
+
+DB must wait till completed before reporting transaction as complete.
+
+#### Replication
+Durability and replication both help towards the goal of no data-loss and should be used together and with backups!
+
+- node death: 
+ D = data unavailable till node alive/data-transfer
+ R = remain available
+ 
+- correlated fault (crash every node for a particular input)
+ R = in-memory data lost
+
+- in async replica system, recent writes may be lost when leader unavailable
+- power cut, SSDs can violate data loss guarantees
+- files/data on disk can corrupt
