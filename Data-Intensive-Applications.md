@@ -100,8 +100,8 @@ DB must wait till completed before reporting transaction as complete.
 Durability and replication both help towards the goal of no data-loss and should be used together and with backups!
 
 - node death: 
-  D = data unavailable till node alive/data-transfer
-  R = remain available
+  - D = data unavailable till node alive/data-transfer
+  - R = remain available
  
 - correlated fault (crash every node for a particular input)
  R = in-memory data lost
