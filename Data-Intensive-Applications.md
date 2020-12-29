@@ -8,13 +8,13 @@ main reason: scalability
 
 also and related - for performance - geared towards transactions or analytics
 
-Approaches: 
+### Approaches
 1) partition by key range (good for ranged queries, harder to avoid skew)
 2) by hash of key (good for skew, bad for range queries)
 
 Cassandra has a compromise - compound primary key, hashing first part, but indexing subsequent parts for sorting. Good for 1-many relationships. e.g. user posts in a timeframe
 
-Secondary indexes: 
+### Secondary indexes
 1) partitioning secondary indexes by Document 
 aka local index
 each partition maintians own indexes (index updates simple)
@@ -30,14 +30,15 @@ Q - but since the row/doc lives on aonther partition could still involve read fr
 bad = writes slower and more complicated
  - data can be out of date
 
-Rebalancing
+### Rebalancing
 Things change: more queries, more data, machine failures
+
 require:
 - even load as result
 - no disruption
 - no more data moved than necessary
 
-steategy: 
+#### strategy: 
 1) fixed number of partitions: (start with more than you need) then redistribution effort can be shared (take x from each node when add a node) 
 - Riak, Elas, Couchbase, Vold
 Correct number of starting positions is hard and could mean all data on one node initially.
@@ -58,9 +59,10 @@ Auromatic or Manual Rebalancing?
 - danger of cascading failure, since (during) an overloaded node may be concluded as dead and then cluster rebalances (again) which adds pressure.
 - Couchbase, Riak, Vold require an admin to commit the suggested repartition
 
-Request Routing
+### Request Routing
 general problem is service discovery
-approaches:
+
+#### approaches:
 1) clients contact any node and it may forward the request to another
 Cassandra, Riak - gossip protocol
 2) all request via a routing tier 
