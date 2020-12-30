@@ -145,9 +145,11 @@ Not always possible, e.g. updating a Wiki doc involves arbitrary text editing.
 #### Explicit locking
 Example, games where 2 players can move same piece and require game logic validation to pass first. The lock prevents a concurrent move.
 
+
    Begin transaction; select ... for update;
    -- check valid in application code
    Update ...; Commit;
+  
   
 ? What if not valid - need to release with the commit.
 
@@ -165,6 +167,7 @@ So a trx is aborted - which means the application sees a failed trx. Which means
 
 #### Compare-and-set
 Can fail because the where clause could be reading from an old version! So the set succeeds but the compare was actually false!
+
 
    basically: If value = x, set value = y
   
