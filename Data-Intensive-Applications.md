@@ -109,3 +109,61 @@ Durability and replication both help towards the goal of no data-loss and should
 - in async replica system, recent writes may be lost when leader unavailable
 - power cut, SSDs can violate data loss guarantees
 - files/data on disk can corrupt
+
+### Isolation Levels:
+### Read committed
+To me, this means: writes respect transactions, and can't read what hasn't been committed
+
+1. only see data that has been committed (No dirty reads)
+2. only overwrite committed data (No dirty writes)
+
+### Repeatable read and Snapshot Isolation
+To me, this means: reads are effectively acquire a lock in the same way as a write (but without the perf problems)
+
+Often needed in order to make a backup - otherwise state can be inconsistent
+
+### Implementation
+a) version objects by the transaction Id affecting them
+b) B-tree append only, root node changes with each update (CouchDB, Datomic, LMDB), each root provides a consistent snapshot. Requires a background process for garbage collection and compaction.
+
+#### Repeatable read
+No-one really knows what it means. Defined before Snapshot Isolation existed. There is a formal definition but most vendors don't adhere to it. MySQL and PSQL term their Snapshot Isolation as RR.
+
+### Lost Updates
+One of the concurrent write problems (as is dirty writes)
+
+Example, 2 users trying to increment a counter. Result is as if only one increment done, since both "reads" of current value take the original and inc concurrently.
+
+#### Atomic write operations
+Lock on the object being read. aka _cursor stability_
+
+  Update counters set value = value + 1 where key = 'foo';
+  
+Not always possible, e.g. updating a Wiki doc involves arbitrary text editing.
+
+#### Explicit locking
+Example, games where 2 players can move same piece and require game logic validation to pass first. The lock prevents a concurrent move.
+
+   Begin transaction; select ... for update;
+   -- check valid in application code
+   Update ...; Commit;
+  
+? What if not valid - need to release with the commit.
+
+I'm not keen on this - there is complexity that I think could be handled better by instead just ensuring all users of the same game have their actions processed as a stream in a single thread in the application.
+
+#### Auto detection of lost updates
+We could allow them to happen and then detect and abort a trx in the event.
+
+Benefits
+- Snapshot Isolation can be used for this detection. MySQL does not do this, so some argue it fails to provide true snapshot isolation.
+- do not require application code to use any special features - can forget to use atomic operations and ok?
+
+**Question I have:**
+So a trx is aborted - which means the application sees a failed trx. Which means it can retry it. Is it always this simple?
+
+#### Compare-and-set
+Can fail because the where clause could be reading from an old version! So the set succeeds but the compare was actually false!
+
+  basically: If value = x, set value = y
+  
