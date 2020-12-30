@@ -124,6 +124,7 @@ Often needed in order to make a backup - otherwise state can be inconsistent
 
 ### Implementation
 a) version objects by the transaction Id affecting them
+
 b) B-tree append only, root node changes with each update (CouchDB, Datomic, LMDB), each root provides a consistent snapshot. Requires a background process for garbage collection and compaction.
 
 #### Repeatable read
