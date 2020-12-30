@@ -166,5 +166,5 @@ So a trx is aborted - which means the application sees a failed trx. Which means
 #### Compare-and-set
 Can fail because the where clause could be reading from an old version! So the set succeeds but the compare was actually false!
 
-  basically: If value = x, set value = y
+   basically: If value = x, set value = y
   
