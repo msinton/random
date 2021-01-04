@@ -164,8 +164,8 @@ Benefits
 - Snapshot Isolation can be used for this detection. MySQL does not do this, so some argue it fails to provide true snapshot isolation.
 - do not require application code to use any special features - can forget to use atomic operations and ok?
 
-**Question I have:**
-So a trx is aborted - which means the application sees a failed trx. Which means it can retry it. Is it always this simple?
+**Thoughts:**
+So a trx is aborted - which means the application sees a failed trx. Which means it can retry it.
 
 #### Compare-and-set
 Can fail because the where clause could be reading from an old version! So the set succeeds but the compare was actually false!
@@ -173,3 +173,54 @@ Can fail because the where clause could be reading from an old version! So the s
 ```
    basically: If value = x, set value = y
 ```
+
+## Distributed transactions and consensus
+
+**2PC** 
+
+Two phase commit is a common mechanism for DBs to achieve consensus in a cluster. While it does achieve Linearizability, it is flawed.
+
+It is slow due to the extra network hops and fsync, but worse than that, it suffers from single point of failure which defeats the main purpose of higher availability. It works by use of a coordinator which is a single node, if that node fails everything stops to wait for that node to be recovered in some way. Also, all nodes must respond in agreement for a transaction to be committed, so again if one node's response is not heard the whole system grinds to a halt - other trxs may continue but only as long as they are not blocked by the locks put in place for the waiting trx. In MySQL the performance is 10x worse than a single node.
+
+## Fault-Tolerant Consensus
+
+### Total order broadcast (pg 348)
+It has been proven that consensus is equivalent to total order broadcast. If one can be implemented, the other can be expressed throught it. For performance reasons, consensus algormithms normally work by using total order broadcast, rather than reaching consensus repeatedly for every request. 
+
+Algorithms: Viewstamped Replication (VSR), Paxos, Raft, Zab (pg 366)
+
+#### Cost of consensus
+- require a majority of functioning/communicating nodes
+- fixed set of nodes, not dynamic (most algos require -- check this! outdated?) 
+- unstable network can result in all time spent electing a leader rather than working (rely on timeouts)
+
+### ZooKeeper
+- total order broadcast
+- linearizable atomic operations
+- total ordering of operations -> fencing token zxid
+- failure detection, exchange heartbeats with clients -> sessions that can expire and can release locks.
+- change notifications -> clients can read locks and values set by other clients and watch for changes.
+
+### Summary
+Many problems are equivalent to consensus
+
+- Linearizable compare and set registers (decide atomically to set a value based on whether it currently equals a value) 
+- Atomic transaction commit (DB decides to commit or abort a distributed transaction)
+- Total order broadcast (decide the order to deliver messages)
+- Locks and leases
+- Membership/ coordination service
+- Uniqueness constraint
+
+All easy with a single node or a leader. But drawback is availability - forced to
+1. wait for leader to recover. If leader fails to recover, the system is blocked forever!
+1. manually fail over - human must choose leader.
+1. Use an algo to elect. Requires a consensus algo - and we want one the handles adverse network conditions.
+
+Single leaders approaches still need consenus to reach this state and stay in this state in the event of changing conditions. So why not just do consensus all the time!
+
+Leaderless and multi-leader systems typically do not use consensus. This results in conflicts, but in some cases that it the right choice.
+
+
+
+
+
