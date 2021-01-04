@@ -204,7 +204,7 @@ Algorithms: Viewstamped Replication (VSR), Paxos, Raft, Zab (pg 366)
 ### Summary
 Many problems are equivalent to consensus
 
-- Linearizable compare and set registers (decide atomically to set a value based on whether it currently equals a value) 
+- Linearizable compare-and-set registers (decide atomically to set a value based on whether it currently equals a value) 
 - Atomic transaction commit (DB decides to commit or abort a distributed transaction)
 - Total order broadcast (decide the order to deliver messages)
 - Locks and leases
@@ -218,7 +218,7 @@ All easy with a single node or a leader. But drawback is availability - forced t
 
 Single leaders approaches still need consenus to reach this state and stay in this state in the event of changing conditions. So why not just do consensus all the time!
 
-Leaderless and multi-leader systems typically do not use consensus. This results in conflicts, but in some cases that it the right choice.
+Leaderless and multi-leader systems typically do not use consensus. This results in conflicts, but in some cases that is the right choice.
 
 
 
