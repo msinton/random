@@ -220,7 +220,34 @@ Single leaders approaches still need consenus to reach this state and stay in th
 
 Leaderless and multi-leader systems typically do not use consensus. This results in conflicts, but in some cases that is the right choice.
 
+## Stream Processing
 
+Application state can be seen as integration of a stream of events over time.
+
+While a change stream is what you get when you differentiate the state by time.
+
+### Immutable events
+An old idea. Example of accountants - each transaction written in append only ledger and corrections are written in the same way - they do not mutate the previous transaction. Important for auditing. Incorrect figures already been published then next accounting period includes the correction.
+
+Benefits: diagnosis, bug fixes, capture more than the current state - useful data perhaps. deriving several views from the same source. 
+
+Databases are there for how the data will be accessed and many of the complexities of schema design come from these concerns. But often we need to design also for how the data will be written. With an immutable event log we separate the form data is written from the form it is read. AKA `command query responsibility segregation`
+
+### Concurrency control
+
+The problem that a consumer is asynchronous, so what do we do when the consumer wants to make a change? How will they find if their write has been reflected?
+Some solutions: pg 162, Reading your own writes, pg 350 Implementing linearizable storage using total order broadcast.
+
++ve: multi-object transaction problem is solved - a system can be self-contained for describing user action. The user action is written in 1 place - the event log - easily atomic. If application state is partitioned by the same key as the event log then a single threaded consumer can process the event.
+
+
+### CEP
+Complex Event Processing flips queries on their head. A stream continually looks for a pattern of events that matches the given queries and then emits the `complex event`. This can be useful for detecting fraud or anomalies for example. In a way we do this with Kafka, except that we don't have a query language - we just encode the rules with application code and can then emit in any way we choose.
+
+### search on streams
+Elasticsearch percolator. Possible to index the queries so that not every query is tested against every event.
+
+Windows: tumbling, hopping, sliding, session
 
 
 
