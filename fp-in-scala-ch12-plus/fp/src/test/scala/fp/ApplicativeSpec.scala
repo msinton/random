@@ -50,4 +50,46 @@ class ApplicativeSpec extends AnyFunSpec {
     }
   }
 
+  describe("tree") {
+    describe("should have an applicative that obeys the laws") {
+
+      it("map2") {
+        val treeLetters = Tree(
+          "a",
+          List(
+            Tree("b", List(Tree.unit("c"))),
+            Tree.unit("d")
+          )
+        )
+        val treeNumbers = Tree(
+          1,
+          List(
+            Tree(2, List(Tree.unit(3))),
+            Tree.unit(4)
+          )
+        )
+
+        // this is a bit odd but maybe fine.
+        // list has all combinations, except here we have branches - like sub-lists with a notion of depth/parent
+        assert(
+          Applicative.tree.map2(treeLetters, treeNumbers)(_ + _) == Tree(
+            "a1",
+            List(
+              Tree(
+                "b2",
+                List(
+                  Tree("c3", List.empty) // correct - no more at this depth
+                )
+              ),
+              Tree("b4", List.empty),
+              Tree("d2", List.empty),
+              Tree("d4", List.empty)
+            )
+          )
+        )
+
+      }
+    }
+  }
+
 }

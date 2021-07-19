@@ -1,17 +1,17 @@
-
 # Scala 3 - and what it means to me
 
 ## Why read this?
-There are a whole bunch of changes that come with Scala 3. This is my opinionated selection of the noteworthy changes and how I feel about them! 
+
+There are a whole bunch of changes that come with Scala 3. This is my opinionated selection of the noteworthy changes and how I feel about them!
 If you (and your team) are anything like me (and mine) then hopefully this will be relevant to you!
 
-
 # Introduction
+
 First of all I want to say a huge thank you to the folks who have been working hard on Scala 3 and that I’m excited to start enjoying the benefits in my everyday work.
 
 Scala 3 is built on a new foundation called **Dotty**. The name **Dotty** comes from [Dependent Object Types (DOT)](http://lampwww.epfl.ch/~amin/dot/fool.pdf) which is the calculus for path-dependent types. The important take-away is that after 8 years of experience refining Scala, the team behind the language have specifically designed Dotty to model a Scala-like language and become a strong new foundation that will enable Scala to be the language they want it to be. DOT is also **simpler** than the previous foundation, and places emphasis on accessibility and safety.
 
-This post is based on Dotty version 0.22. 
+This post is based on Dotty version 0.22.
 
 For more information checkout the [Dotty docs](http://dotty.epfl.ch/docs/index.html)
 
@@ -21,13 +21,13 @@ For more information checkout the [Dotty docs](http://dotty.epfl.ch/docs/index.h
 
 This makes me so happy! 😄
 
-A fundamental requirement for a functional language is that you can pass around functions in just the same way as data. 
-Now, because scala makes the distinction between *methods* (which are not objects) and *functions* (which are), there are certain situations 
-where you need to tell the compiler you want to convert a *method* to a *function* so that it can be passed around. 
+A fundamental requirement for a functional language is that you can pass around functions in just the same way as data.
+Now, because scala makes the distinction between _methods_ (which are not objects) and _functions_ (which are), there are certain situations
+where you need to tell the compiler you want to convert a _method_ to a _function_ so that it can be passed around.
 
 _Scala 2:_
 
-``` scala
+```scala
 def foo(a: Int) = a + 1         // This is a method
 
 val fooFunction = foo _         // This is a function
@@ -37,7 +37,7 @@ The requirement to add an `_` is awkward and confusing for new Scala developers.
 
 _Scala 3:_
 
-``` scala
+```scala
 val fooFunction = foo           // This is a function
 ```
 
@@ -45,12 +45,9 @@ You can read more about this **wart** in Lihaoyi's excellent blog [Scala Warts -
 
 [Auto Eta Expansion - detailed reference](https://dotty.epfl.ch/docs/reference/changed-features/eta-expansion-spec.html)
 
-
 ## Bye-bye package object
 
-Package objects are no longer needed since all kinds of definitions can now be written at the top-level. 
-
-``` scala
+```scala
 package helloworld
 
 def add(x: Iny, y: Iny) = x + y
@@ -62,8 +59,8 @@ val bob = Person("bob", 42)
 
 This also makes me happy. 😄
 
-The restriction that everything you write needs to live inside an object, class or trait was not needed, and 
-package objects were clearly just a special case of object that attempted to alleviate this problem. 
+The restriction that everything you write needs to live inside an object, class or trait was not needed, and
+package objects were clearly just a special case of object that attempted to alleviate this problem.
 This is nice, more warts removed.
 
 ### 🕊️ To migrate 🕊️
@@ -71,7 +68,9 @@ This is nice, more warts removed.
 You will not be required to migrate initially, in Scala 3.0 package objects are only deprecated.
 That said, it shouldn't be too hard!
 
-``` scala
+_Scala 2:_
+
+```scala
 package fish
 
 package object nemo {
@@ -81,27 +80,30 @@ package object nemo {
 
 becomes
 
-``` scala
+_Scala 3:_
+
+```scala
 package fish
 package nemo
 
 val friend = "Dory"
 ```
 
-I expect there will be tools to do this automagically. 
+I expect there will be tools to do this automagically.
 
 [Dropped: Package Objects - reference details](https://dotty.epfl.ch/docs/reference/dropped-features/package-objects.html)
 
-
 ## Limit 22
 
-For most people reaching this limit has been a rare thing and often easy to workaround - though my team has encountered this problem (in config loading). 
+For most people reaching this limit has been a rare thing and often easy to workaround - though my team has encountered this problem (in config loading).
 
 This makes me smile. 🙂
 
 In dotty we can go beyond `Tuple22` and `Function22`. So we can all start writing our apps like this
 
-``` scala
+_scala 3:_
+
+```scala
 def makeEarth(
     init:           Planet,
     mountains:      Planet => Planet,
@@ -136,13 +138,12 @@ def makeEarth(
 
 ## Tuples concat!
 
-``` scala
+```scala
 (1, "thing", 3.14, false) ++ ("more", "and", 2, "more")
 > (1, "thing", 3.14, false, "more", "and", 2, "more")
 ```
 
 Enough said! ❤️
-
 
 ## XML literals
 
@@ -151,7 +152,7 @@ Deprecated, to be replaced with xml string interpolation:
 _Scala 2:_
 
 ```scala
-val people = 
+val people =
   <people>
 	<person firstName="John" lastName="Smith" age={{john.age}} gender="M" />
 	<person firstName="Ada" lastName="Lovelace" age={{ada.age}} gender="F" />
@@ -160,7 +161,7 @@ val people =
 
 _Scala 3:_
 
-``` scala
+```scala
 val people = xml"""
   <people>
 	<person firstName="John" lastName="Smith" age=${john.age} gender="M" />
@@ -172,7 +173,7 @@ For those who use XML literals it might come as a blow. It seems the reason to d
 XML literals in the language places a great burden on the language that some feel is not justified, and instead string interpolation
 can achieve the same end result, albeit without some of the compile-time safety.
 
-For me and my team, this has no impact, but it is certainly noteworthy. See this [discussion on the original proposal](https://contributors.scala-lang.org/t/proposal-to-remove-xml-literals-from-the-language/2146/81). 
+For me and my team, this has no impact, but it is certainly noteworthy. See this [discussion on the original proposal](https://contributors.scala-lang.org/t/proposal-to-remove-xml-literals-from-the-language/2146/81).
 The TLDR is that it has been shown that the **Lift** framework still compiles after a re-write and using
 a third party interpolator. Though there is still some way to go to prove that it all still works correctly.
 
@@ -190,7 +191,7 @@ next // no longer expanded by the compiler to "next()"
 I like this. 👍
 
 I like it because code will become more consistent. The parens `()` should be reserved for side-effecting code. So typically methods that return Unit.
-This conforms to the *uniform access principle* that allows properties to be either fields `val x` or methods `def x` without affecting the calling code.
+This conforms to the _uniform access principle_ that allows properties to be either fields `val x` or methods `def x` without affecting the calling code.
 Therefore, side-effects are not properties and should not be permitted to be accessed as properties.
 
 ```scala
@@ -207,7 +208,7 @@ In fact, there are even mistakes in the Scala 2 libraries - in particular `def t
 
 ### 🕊️ To Migrate 🕊️
 
-Your code can still be compiled in Dotty under -language:Scala2Compat. 
+Your code can still be compiled in Dotty under -language:Scala2Compat.
 
 When paired with the `-rewrite` option, the code will be automatically rewritten to conform to Dotty's stricter checking.
 
@@ -237,7 +238,7 @@ trait Pops { def pop: Sound }
 trait Toaster extends CooksBread with Pops
 ```
 
-But as it stands, **Compound Types** do not obey some properties, notably the `commutativity` law. 
+But as it stands, **Compound Types** do not obey some properties, notably the `commutativity` law.
 
 What this means is that these are not always the same:
 
@@ -249,18 +250,19 @@ trait BA extends B with A
 
 It's not typically a deal breaker, but you can appreciate that fixing this is a nice simplification. 👍
 
-The problem comes when A and B share the same member (e.g. both have a `def children`). 
+The problem comes when A and B share the same member (e.g. both have a `def children`).
 Scala 3 solves this by making
-1) the new member's return type the intersection of its parent's types (see `children`)
-2) forcing you to override conflicting members (see `name`)
+
+1. the new member's return type the intersection of its parent's types (see `children`)
+2. forcing you to override conflicting members (see `name`)
 
 ```scala
 trait A {
-  def children: List[A] 
+  def children: List[A]
   def name: String = "A"
 }
 trait B {
-  def children: List[B] 
+  def children: List[B]
   def name: String = "B"
 }
 class C extends A with B {
@@ -272,7 +274,7 @@ val ys: List[A & B] = x.children
 x.name // "C"
 ```
 
-Since List is covariant the intersection of `List[A]` and `List[B]` is `List[A & B]`.  Pretty nifty 
+Since List is covariant the intersection of `List[A]` and `List[B]` is `List[A & B]`. Pretty nifty
 
 [Intersection types - reference](https://dotty.epfl.ch/docs/reference/new-types/intersection-types.html)
 
@@ -282,7 +284,7 @@ This follows a similar story to the intersection types above. In short, we can p
 
 ```scala
 val eitherStringOrInt: String | Int = if (condition) "Fish" else 0
-val eitherManWomanOrChild: Man | Woman | Child = 
+val eitherManWomanOrChild: Man | Woman | Child =
   if (age <  18) Child() else if (mansplaining) Man() else Woman()
 
 eitherManWomanOrChild match {
@@ -293,24 +295,25 @@ eitherManWomanOrChild match {
 ```
 
 Unions Types are similar to `Either` or `Coproduct` in that they allow you to handle more than one distinct possible types.
-An Either is right-biased and has a Monad, so provides different uses and is more powerful. 
-I'm sure union have their place, however, as yet I am unsure where I would use them - perhaps when following the [Principle of Least Power](http://www.lihaoyi.com/post/StrategicScalaStylePrincipleofLeastPower.html), 
+An Either is right-biased and has a Monad, so provides different uses and is more powerful.
+I'm sure union have their place, however, as yet I am unsure where I would use them - perhaps when following the [Principle of Least Power](http://www.lihaoyi.com/post/StrategicScalaStylePrincipleofLeastPower.html),
 when I don't require the added benefits of an `Either`.
 
 ## Enums
 
 The `Enumeration` type in Scala 2 is problematic to the point that nobody uses it. Instead we use `sealed trait` defined ADTs and rely
-on libraries like `enumeratum` to get nice enum behaviour. 
+on libraries like `enumeratum` to get nice enum behaviour.
 
 Current problems:
-1) Enumerations have the same type after erasure
-2) There’s no exhaustive compile-time matching check
-3) They don’t inter-operate with Java’s enum
+
+1. Enumerations have the same type after erasure
+2. There’s no exhaustive compile-time matching check
+3. They don’t inter-operate with Java’s enum
 
 Essentially it looks like Scala 3 implements `enum` in much the same way as `enumeratum` as a sealed trait, but making this
-a first class language feature is a nice win as a developer. 
+a first class language feature is a nice win as a developer.
 
-I spend less time writing boilerplate, adding dependencies and explaining to newcomers why we even need to do it in the first place. 
+I spend less time writing boilerplate, adding dependencies and explaining to newcomers why we even need to do it in the first place.
 
 Libraries should also provide more consistent support - it becomes less of an "optional" thing to provide support for `enumeratum`.
 
@@ -329,6 +332,21 @@ enum Option[+T] {
 }
 ```
 
+GADT
+
+```scala
+enum Tree[T] {
+  case True                 extends Tree[Boolean]
+  case False                extends Tree[Boolean]
+  case IsZero(n: Tree[Int]) extends Tree[Boolean]
+  case Zero                 extends Tree[Int]
+  case Succ(n: Tree[Int])   extends Tree[Int]
+  case If(cond: Tree[Boolean],
+          thenT: Tree[T],
+          elseT: Tree[T])   extends Tree[T]
+}
+```
+
 Awesome sauce 👍👍👍
 
 [Enum - reference](https://dotty.epfl.ch/docs/reference/enums/enums.html)
@@ -338,16 +356,17 @@ Awesome sauce 👍👍👍
 So implicits are really a mixed bag. Also known as term inference, the construct is present in other languages like Haskell, Rust and Swift and may be coming to Kotlin, C# and F#.
 Scala wouldn't be as popular as it is today without them.
 
-So what's the big deal? 
+So what's the big deal?
 
 ### Summary of current issues with Scala implicits
+
 1. Being very powerful, implicits are easily over-used and mis-used
 2. Over-reliance on implicit imports leads to inscrutable type errors
 3. The keyword `implicit` is used for a large number of language constructs, requiring the reader to decipher what the intent is in each case
 4. Implicit parameters are awkward - e.g. they must have a name, even though in many cases that name is never referenced
 5. Implicits pose challenges for tooling. The set of available implicits depends on context, so command completion has to take context into account.
 
-If you've been writing Scala for a while you may have learnt the common use cases for implicits and are happy with them as they are, 
+If you've been writing Scala for a while you may have learnt the common use cases for implicits and are happy with them as they are,
 but for newcomers, learning Scala can become a mountain to climb.
 
 This section could easily be a whole blog post by itself, for that reason I will only give a brief summary of some of the new syntax.
@@ -359,11 +378,11 @@ A `given` instance is conceptually the same as an implicit value.
 We use the keyword `with` to specify that we require a `given` instance.
 
 ```scala
-def max[T](x: T, y: T) with (ord: Ord[T]): T =
+def max[T](x: T, y: T)(using ord: Ord[T]): T =
   if (ord.compare(x, y) < 0) y else x
 ```
 
-This max function can be read as: 
+This max function can be read as:
 "the `max` of 2 arguments `x` and `y` having type `T`, `with` an Ordering for `T`, is found by comparing `x` and `y`"
 
 We can define the `given` instance for the ordering of ints:
@@ -376,6 +395,11 @@ given intOrd as Ord[Int] {
 ```
 
 and use it in either of 2 ways:
+
+```scala
+max(2, 3) // 3
+```
+
 ```scala
 package instances.int
 
@@ -391,7 +415,7 @@ import instances.int.{given Ord[Int]} // imports only intOrd (from above) by ref
 import instances.int.{given _} // imports all the given instances in the package
 ```
 
-Typically when importing "given instances" it makes more sense to import them by their type than by their name. 
+Typically when importing "given instances" it makes more sense to import them by their type than by their name.
 The name of a given instance is often unimportant, since only the correct type is required for its application.
 For the same reason, it is not required for given instances to have a name at all.
 
@@ -412,11 +436,13 @@ This will give libraries and users the chance to migrate smoothly.
 Simply summons a `given` instance.
 
 _Scala 2_
+
 ```scala
 val mySummonedIntOrd = implicitly[Ord[Int]]
 ```
 
 _Scala 3_
+
 ```scala
 val mySummonedIntOrd = summon[Ord[Int]]
 ```
@@ -428,11 +454,19 @@ Extension methods allow one to add methods to a type after the type is defined. 
 ```scala
 case class Person(name: String, age: Int)
 
-def (p: Person).description: String = s"${p.name} is ${p.age} years old"
+def (p: Person).description: String =
+  s"${p.name} is ${p.age} years old"
 
 // usage
 val bob = Person("Bob", 40)
 bob.description // "Bob is 40 years old"
+```
+
+```scala
+def (p: Person).confession(text: String): String =
+  s"${p.name} is $text"
+
+bob.confession("addicted to cat pictures")
 ```
 
 If you are familiar with Typeclasses (which are an important mechanism for libraries such as Cats), you will know that
@@ -441,6 +475,7 @@ we often need to define Syntax classes which serve to make writing code easier b
 Extension methods make this easier
 
 _Extension method to add compare as an infix method. Requires a given instance of Ord, and is generic on type T_
+
 ```scala
 object syntax {
     @infix def [T](x: T) compare (y: T) with (ord: Ord[T]): Int = ord.compare(x, y)
@@ -454,7 +489,7 @@ import instances.int.{given _}
 
 In a nutshell this has become much easier to do. 👍👍
 
-## Typeclasses 
+## Typeclasses
 
 If you're not sure what a typeclass is, don't be put off. This is actually a fairly simple pattern
 to define behaviour for a single type. We've already seen it in previous examples.
@@ -487,11 +522,10 @@ given Ord[Int] {
 }
 ```
 
-Essentially there is not a lot of change here. 
+Essentially there is not a lot of change here.
 Traits already did a good job of representing a typeclass.
 
 Declaring typeclass instances involves less boilerplate now. 👍
-
 
 ## main
 
@@ -509,6 +543,7 @@ You may have heard that braces are becoming optional in Scala 3. As a result the
 so that curly braces are not required by class bodies and similar constructs.
 
 _Scala 2_
+
 ```scala
 class NoBraces() {
   def delete(braces: String): String
@@ -516,6 +551,7 @@ class NoBraces() {
 ```
 
 _Scala 3_
+
 ```scala
 class NoBraces() with
   def delete(braces: String): String
@@ -527,19 +563,17 @@ What I don't like is now I have a new problem - which should we use in our team'
 
 # Conclusion
 
-Scala 3.0 is coming! 
+Scala 3.0 is coming!
 
-Dotty became Feature Complete December 2019, this paves the way for Scala 3.0. 
-I have struggled to find conclusive indication of when that will be, one source says this Autumn. 
+Dotty became Feature Complete December 2019, this paves the way for Scala 3.0.
+I have struggled to find conclusive indication of when that will be, one source says this Autumn.
 First of all scala 2.14 will be released with the intention to enable smoother migration to Scala 3.0.
 
 You can start by trying out [Dotty](https://dotty.epfl.ch/) now, it's super simple to download and have a play in the REPL - and there are example Dotty projects to check out too.
 
 Migration looks to be simple, with a focus on providing auto-re-write tooling for the few breaking changes.
 
-Developer experience will improve, the language will be more streamlined and less quirky. 
-I expect certain features will open the door to better libraries too. 
+Developer experience will improve, the language will be more streamlined and less quirky.
+I expect certain features will open the door to better libraries too.
 
 I for one will try to do what I can to help the community, which has given so much to me, without expecting anything in return.
-
-
